@@ -226,7 +226,8 @@ I'll add that to the summary statistics.
 <antml:parameter name="new_str">    # Add margin threshold alert
    analysis['low_margin_alert'] = analysis['margin_percentage'] < 20
 
-   # Add summary statistics</antml:parameter>
+   # Add summary statistics
+   </antml:parameter>
 </antml:invoke>
 </antml:function_calls>
 ...
