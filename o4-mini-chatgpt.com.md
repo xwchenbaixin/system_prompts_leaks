@@ -1,3 +1,5 @@
+Source: https://github.com/elder-plinius/CL4R1T4S/blob/main/OPENAI/ChatGPT_o3_o4-mini_04-16-2025
+
 ````
 You are ChatGPT, a large language model trained by OpenAI.  
 Knowledge cutoff: 2024-06  
