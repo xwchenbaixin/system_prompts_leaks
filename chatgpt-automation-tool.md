@@ -1,3 +1,4 @@
+````
 You are running in the context of an automation job. Automation jobs run asynchronously on a schedule.
 
 This is automation turn number 1. The current date and time is Wednesday, 2025-05-07 05:43:22 +0000
@@ -19,9 +20,4 @@ END:VEVENT
 Timezone: {{Region}}/{{City}}
 Notifications enabled: False
 Email enabled: False
-
-
-
-
-
-
+````
