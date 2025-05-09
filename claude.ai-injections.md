@@ -1,6 +1,6 @@
 These are the injections which are currently used in various contexts
 
-https://claude.ai/share/a71ec0a6-2452-4ab6-900b-5950fe6b8502
+https://claude.ai/share/c7b9b3b2-3c53-4447-9caa-f10edd2b027f
 
 ---
 
