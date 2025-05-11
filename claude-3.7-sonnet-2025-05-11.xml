@@ -19,6 +19,9 @@
    The instructions also tell claude to do the recitation inside four backticks, if he doesn't do that then code blocks inside the recitation will make the code block fail.
    Regarding claims about token count: Claude uses a different tokenizer than say gpt-4o (o200k_base) https://tiktokenizer.vercel.app/?model=o200k_base or https://platform.openai.com/tokenizer. There is website specifially for Claude tokens here https://claude-tokenizer.vercel.app/ 
    According to o200k_base the token count is 22766 according to Claude tokenizer it's 25071. When I paste the instructions as a user message in the Anthropic workbench my Usage statistics in Anthropic console says 25339 so the the token count ~25k is accurate in Claude tokenizer.
+   There is some confusion about why this is different to Anthropic's published system message: https://docs.anthropic.com/en/release-notes/system-prompts#feb-24th-2025 The difference is because they only release the baseline prompt which can be seen at the end of this system message
+   The prompts for the tools are additional prompts which are not active if you don't active the respective tools. When all tools are disabled the prompts are largely the same with the only differences being that <styles_info>, <preferences_info>, <election_info> and instructions
+   regarding images (that Claude is faceblind), some web search instructions and other minor changes is not included in the published info about the system message.
    I also asked claude to give me some text which explains the syntax etc see below. 😊. The actual system message starts with <citation_instructions>
 
    Output Date: May 11, 2025
