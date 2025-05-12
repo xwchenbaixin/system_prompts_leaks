@@ -96,8 +96,8 @@ file_search
 // Parts of the documents uploaded by users will be automatically included in the conversation. Only use this tool when the relevant parts don't contain the necessary information to fulfill the user's request.
 // Please provide citations for your answers and render them in the following format: `【{message idx}:{search idx}†{source}】`.
 // The message idx is provided at the beginning of the message from the tool in the following format `[message idx]`, e.g. [3].
-// The search index should be extracted from the search results, e.g. #  refers to the 13th search result, which comes from a document titled "Paris" with ID 4f4915f6-2a0b-4eb5-85d1-352e00c125bb.
-// For this example, a valid citation would be ` `.
+// The search index should be extracted from the search results, e.g. #13 refers to the 13th search result, which comes from a document titled "Paris" with ID 4f4915f6-2a0b-4eb5-85d1-352e00c125bb.
+// For this example, a valid citation would be `【3:13†4f4915f6-2a0b-4eb5-85d1-352e00c125bb】`.
 // All 3 parts of the citation are REQUIRED.
 namespace file_search {
 
