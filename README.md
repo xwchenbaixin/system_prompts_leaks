@@ -1,5 +1,4 @@
-I'm working on proofs if you have ideas on good methods contact me:
-
+requests:
 email: asgeirtj at gmail.com  
 Discord username: asgeirtj  
 x.com/asgeirtj1  
