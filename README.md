@@ -16,5 +16,6 @@ Contact Info:
 
 email: asgeirtj at gmail.com  
 Discord username: asgeirtj  
-X profile: https://x.com/asgeirtj
-reddit: https://www.reddit.com/user/StableSable/
+X profile: https://x.com/asgeirtj  
+reddit: https://www.reddit.com/user/StableSable/  
+
