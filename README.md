@@ -19,3 +19,4 @@ Discord username: asgeirtj
 X profile: https://x.com/asgeirtj  
 reddit: https://www.reddit.com/user/StableSable/  
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/asgeirtj/system_prompts_leaks)
