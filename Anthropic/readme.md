@@ -1,4 +1,30 @@
-# Table of Contents
+# Claude.ai System Message FAQ
+
+CHARACTER ENCODING DETAILS:
+The system message contains various escaped characters and formatting codes:
+
+- \n - Represents newline characters in the JSON strings
+- \t - Represents tab characters for indentation
+- \u2019 - Unicode escape sequence for right single quotation mark (')
+- \u201c, \u201d - Unicode escape sequences for curly quotation marks (" and ")
+- \u00a0 - Unicode escape sequence for non-breaking space
+
+These escape sequences are necessary because the function definitions are embedded
+as JSON objects, which require special characters to be properly escaped. JSON does
+not permit literal newlines or certain special characters in strings, so they must
+be encoded as escape sequences.
+
+## Table of Contents
+
+1. <citation_instructions>
+2. <artifacts_info>
+3. Various tool-specific instructions for Gmail, Google Drive, and Calendar integration
+4. <search_instructions> - Complex set of guidelines for web search behaviors
+5. <user_preferences>
+6. <styles_info> - Instructions for adapting writing style based on user preferences
+7. Anthropic System Prompt [Anthropic System Prompts Documentation](https://docs.anthropic.com/en/release-notes/system-prompts)
+
+---
 
 1.  **Citation Instructions**
     *   Rules for Good Citations
