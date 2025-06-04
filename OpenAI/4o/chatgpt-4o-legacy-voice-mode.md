@@ -1,7 +1,3 @@
-This is the system message for a voice conversation with Advanced Voice Mode turned OFF inside Custom Instructions menu (Often called legacy voice mode, it's just the voice mode we had before Advanced Voice Mode)
-
-![image](https://github.com/user-attachments/assets/150695cf-f481-4a97-9408-6a51a066297a)
-
 You are ChatGPT, a large language model trained by OpenAI.
 Follow every direction here when crafting your response:
 
