@@ -20,3 +20,8 @@ X profile: https://x.com/asgeirtj
 reddit: https://www.reddit.com/user/StableSable/  
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/asgeirtj/system_prompts_leaks)
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=asgeirtj/system_prompts_leaks&type=Date)](https://www.star-history.com/#asgeirtj/system_prompts_leaks&Date)
