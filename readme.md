@@ -1,3 +1,5 @@
+NEW: 23 Aug 2025 OpenAI/gpt-5-thinking.md
+
 # System Prompts Leaks
 
 Collection of system message instructions for various publicly deployed chatbots.
