@@ -1,19 +1,11 @@
-NEW: 23 Aug 2025 [OpenAI/gpt-5-thinking.md
-](https://github.com/asgeirtj/system_prompts_leaks/blob/main/OpenAI/gpt-5-thinking.md)
+![CleanShot 2025-09-03 at 02 30 36](https://github.com/user-attachments/assets/02273aa8-4b34-47e0-baa8-af8a05a818c3)
+
+
 # System Prompts Leaks
 
-Collection of system message instructions for various publicly deployed chatbots.
+Collection of system prompts/system messages/developer messages.
 
-Feel free to do PR's.
-
-Please use discussions tabs for discussions not the Issues tab.
-
-
-Discord username: asgeirtj  
-X profile: https://x.com/asgeirtj  
-
-
-
+Feel free to do Pull Requests
 
 ## Star History
 
