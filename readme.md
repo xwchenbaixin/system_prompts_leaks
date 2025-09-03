@@ -1,4 +1,4 @@
-![CleanShot 2025-09-03 at 02 30 36](https://github.com/user-attachments/assets/02273aa8-4b34-47e0-baa8-af8a05a818c3)
+![CleanShot 2025-09-03 at 02 37 49](https://github.com/user-attachments/assets/22d32e2d-e0c9-4afc-9e72-44b779dac659)
 
 
 # System Prompts Leaks
