@@ -1,11 +1,11 @@
 # PDF Processing (/mnt/skills/public/pdf/SKILL.md)
 
 ---
-name: PDF Processing
-description: Comprehensive PDF manipulation toolkit for extracting text and tables, creating new PDFs, merging/splitting documents, and handling forms.
-when_to_use: When Claude needs to fill in a PDF form or programmatically process, generate, or analyze PDF documents at scale.
-version: 0.0.1
-dependencies: pytesseract>=0.3.10, pdf2image>=1.16.0
+* name: PDF Processing
+* description: Comprehensive PDF manipulation toolkit for extracting text and tables, creating new PDFs, merging/splitting documents, and handling forms.
+* when_to_use: When Claude needs to fill in a PDF form or programmatically process, generate, or analyze PDF documents at scale.
+* version: 0.0.1
+* dependencies: pytesseract>=0.3.10, pdf2image>=1.16.0
 ---
 
 # PDF Processing Guide
