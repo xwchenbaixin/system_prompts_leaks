@@ -77,7 +77,9 @@ interface ReadTool {
 **JSON Schema Details:**
 ```json
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
+  "additionalProperties": false,
   "required": ["file_path"],
   "properties": {
     "file_path": {
@@ -86,11 +88,11 @@ interface ReadTool {
     },
     "offset": {
       "type": "number",
-      "description": "The line number to start reading from"
+      "description": "The line number to start reading from. Only provide if the file is too large to read at once"
     },
     "limit": {
       "type": "number",
-      "description": "The number of lines to read"
+      "description": "The number of lines to read. Only provide if the file is too large to read at once."
     }
   }
 }
@@ -142,6 +144,7 @@ interface WriteTool {
 **JSON Schema Details:**
 ```json
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "required": ["file_path", "content"],
   "additionalProperties": false,
@@ -217,6 +220,7 @@ interface EditTool {
 **JSON Schema Details:**
 ```json
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "required": ["file_path", "old_string", "new_string"],
   "additionalProperties": false,
@@ -292,6 +296,7 @@ interface GlobTool {
 **JSON Schema Details:**
 ```json
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "required": ["pattern"],
   "additionalProperties": false,
@@ -302,7 +307,7 @@ interface GlobTool {
     },
     "path": {
       "type": "string",
-      "description": "The directory to search in. If not specified, the current working directory will be used"
+      "description": "The directory to search in. If not specified, the current working directory will be used. IMPORTANT: Omit this field to use the default directory. DO NOT enter \"undefined\" or \"null\" - simply omit it for the default behavior. Must be a valid directory path if provided."
     }
   }
 }
@@ -350,6 +355,67 @@ interface GrepTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["pattern"],
+  "additionalProperties": false,
+  "properties": {
+    "pattern": {
+      "type": "string",
+      "description": "The regular expression pattern to search for in file contents"
+    },
+    "path": {
+      "type": "string",
+      "description": "File or directory to search in (rg PATH). Defaults to current working directory."
+    },
+    "output_mode": {
+      "type": "string",
+      "enum": ["content", "files_with_matches", "count"],
+      "description": "Output mode: \"content\" shows matching lines (supports -A/-B/-C context, -n line numbers, head_limit), \"files_with_matches\" shows file paths (supports head_limit), \"count\" shows match counts (supports head_limit). Defaults to \"files_with_matches\"."
+    },
+    "glob": {
+      "type": "string",
+      "description": "Glob pattern to filter files (e.g. \"*.js\", \"*.{ts,tsx}\") - maps to rg --glob"
+    },
+    "type": {
+      "type": "string",
+      "description": "File type to search (rg --type). Common types: js, py, rust, go, java, etc. More efficient than include for standard file types."
+    },
+    "-i": {
+      "type": "boolean",
+      "description": "Case insensitive search (rg -i)"
+    },
+    "-n": {
+      "type": "boolean",
+      "description": "Show line numbers in output (rg -n). Requires output_mode: \"content\", ignored otherwise."
+    },
+    "-A": {
+      "type": "number",
+      "description": "Number of lines to show after each match (rg -A). Requires output_mode: \"content\", ignored otherwise."
+    },
+    "-B": {
+      "type": "number",
+      "description": "Number of lines to show before each match (rg -B). Requires output_mode: \"content\", ignored otherwise."
+    },
+    "-C": {
+      "type": "number",
+      "description": "Number of lines to show before and after each match (rg -C). Requires output_mode: \"content\", ignored otherwise."
+    },
+    "multiline": {
+      "type": "boolean",
+      "description": "Enable multiline mode where . matches newlines and patterns can span lines (rg -U --multiline-dotall). Default: false."
+    },
+    "head_limit": {
+      "type": "number",
+      "description": "Limit output to first N lines/entries, equivalent to \"| head -N\". Works across all output modes: content (limits output lines), files_with_matches (limits file paths), count (limits count entries). When unspecified, shows all results from ripgrep."
+    }
+  }
+}
+```
+
 **Core Implementation:**
 - Uses ripgrep binary (explicitly stated)
 - Default output_mode: "files_with_matches"
@@ -380,6 +446,40 @@ interface NotebookEditTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["notebook_path", "new_source"],
+  "additionalProperties": false,
+  "properties": {
+    "notebook_path": {
+      "type": "string",
+      "description": "The absolute path to the Jupyter notebook file to edit (must be absolute, not relative)"
+    },
+    "new_source": {
+      "type": "string",
+      "description": "The new source for the cell"
+    },
+    "cell_id": {
+      "type": "string",
+      "description": "The ID of the cell to edit. When inserting a new cell, the new cell will be inserted after the cell with this ID, or at the beginning if not specified."
+    },
+    "cell_type": {
+      "type": "string",
+      "enum": ["code", "markdown"],
+      "description": "The type of the cell (code or markdown). If not specified, it defaults to the current cell type. If using edit_mode=insert, this is required."
+    },
+    "edit_mode": {
+      "type": "string",
+      "enum": ["replace", "insert", "delete"],
+      "description": "The type of edit to make (replace, insert, delete). Defaults to replace."
+    }
+  }
+}
+```
+
 **Cell Indexing:**
 - 0-indexed (first cell is index 0)
 - Identifies cells by cell_id
@@ -401,17 +501,17 @@ interface NotebookEditTool {
 - "You can use the `run_in_background` parameter to run the command in the background, which allows you to continue working while the command runs"
 - "**Never use `run_in_background` to run 'sleep' as it will return immediately**. You do not need to use '&' at the end of the command when using this parameter"
 
-**Command Restrictions :**
+**Command Restrictions:**
 - "**Avoid** using Bash with the `find`, `grep`, `cat`, `head`, `tail`, `sed`, `awk`, or `echo` commands, unless explicitly instructed or when these commands are truly necessary for the task"
 - "**NEVER** use bash for file operations (cat/head/tail, grep, find, sed/awk, echo >/cat <<EOF)"
 
-**Multiple Commands :**
+**Multiple Commands:**
 - "When issuing multiple commands: **If the commands are independent** and can run in parallel, make **multiple Bash tool calls in a single message**"
 - "**If the commands depend on each other** and must run sequentially, use a single Bash call with '&&' to chain them together"
 - "Use ';' only when you need to run commands sequentially but don't care if earlier commands fail"
 - "**DO NOT use newlines to separate commands** (newlines are ok in quoted strings)"
 
-**Working Directory :**
+**Working Directory:**
 - "Try to maintain your current working directory throughout the session by **using absolute paths and avoiding usage of `cd`**. You may use `cd` if the User explicitly requests it"
 
 **Parameters:**
@@ -424,12 +524,40 @@ interface BashTool {
 }
 ```
 
-**Verified Limits:**
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["command"],
+  "additionalProperties": false,
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "The command to execute"
+    },
+    "description": {
+      "type": "string",
+      "description": "Clear, concise description of what this command does in 5-10 words, in active voice. Examples:\nInput: ls\nOutput: List files in current directory\n\nInput: git status\nOutput: Show working tree status\n\nInput: npm install\nOutput: Install package dependencies\n\nInput: mkdir foo\nOutput: Create directory 'foo'"
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Optional timeout in milliseconds (max 600000)"
+    },
+    "run_in_background": {
+      "type": "boolean",
+      "description": "Set to true to run this command in the background. Use BashOutput to read the output later."
+    }
+  }
+}
+```
+
+**Operational Limits:**
 - Default timeout: 120000ms (2 minutes)
 - Maximum timeout: 600000ms (10 minutes)
 - Output truncated at 30000 characters
 
-**Git Safety :**
+**Git Safety:**
 - "**NEVER** update the git config"
 - "**NEVER** run destructive/irreversible git commands (like push --force, hard reset, etc) unless the user explicitly requests them"
 - "**NEVER** skip hooks (--no-verify, --no-gpg-sign, etc) unless the user explicitly requests it"
@@ -457,7 +585,27 @@ interface BashOutputTool {
 }
 ```
 
-**Verified Behavior:**
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["bash_id"],
+  "additionalProperties": false,
+  "properties": {
+    "bash_id": {
+      "type": "string",
+      "description": "The ID of the background shell to retrieve output from"
+    },
+    "filter": {
+      "type": "string",
+      "description": "Optional regular expression to filter the output lines. Only lines matching this regex will be included in the result. Any lines that do not match will no longer be available to read."
+    }
+  }
+}
+```
+
+**Behavior:**
 - Returns ONLY new output since last check
 - Non-blocking (returns immediately)
 - Filter permanently removes non-matching lines
@@ -480,6 +628,22 @@ interface KillShellTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["shell_id"],
+  "additionalProperties": false,
+  "properties": {
+    "shell_id": {
+      "type": "string",
+      "description": "The ID of the background shell to kill"
+    }
+  }
+}
+```
+
 ---
 
 ## Agent Management
@@ -496,13 +660,13 @@ interface KillShellTool {
   - **statusline-setup**: "Use this agent to configure the user's Claude Code status line setting" (Tools: **Read, Edit**)
   - **output-style-setup**: "Use this agent to create a Claude Code output style" (Tools: **Read, Write, Edit, Glob, Grep**)
 
-**When NOT to use :**
+**When NOT to use:**
 - "If you want to read a specific file path, use the Read or Glob tool instead of the Agent tool, to find the match more quickly"
 - "If you are searching for a specific class definition like \"class Foo\", use the Glob tool instead, to find the match more quickly"
 - "If you are searching for code within a specific file or set of 2-3 files, use the Read tool instead of the Agent tool, to find the match more quickly"
 - "Other tasks that are not related to the agent descriptions above"
 
-**Agent Behavior :**
+**Agent Behavior:**
 - "Launch multiple agents concurrently whenever possible, to maximize performance; to do that, use a **single message with multiple tool uses**"
 - "When the agent is done, it will return a **single message** back to you. The result returned by the agent is **not visible to the user**"
 - "For agents that run in the background, you will need to use AgentOutputTool to retrieve their results once they are done"
@@ -519,13 +683,37 @@ interface TaskTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["description", "prompt", "subagent_type"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "A short (3-5 word) description of the task"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "The task for the agent to perform"
+    },
+    "subagent_type": {
+      "type": "string",
+      "description": "The type of specialized agent to use for this task"
+    }
+  }
+}
+```
+
 **Technical Tool Access:**
 - general-purpose: ALL tools (*)
 - Explore: Glob, Grep, Read, Bash
 - statusline-setup: Read, Edit
 - output-style-setup: Read, Write, Edit, Glob, Grep
 
-**Thoroughness Levels (VERIFIED for Explore agent):**
+**Thoroughness Levels (Explore Agent):**
 - "quick" - basic searches
 - "medium" - moderate exploration
 - "very thorough" - comprehensive analysis
@@ -553,6 +741,22 @@ interface SkillTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["command"],
+  "additionalProperties": false,
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "The skill name (no arguments). E.g., \"pdf\" or \"xlsx\""
+    }
+  }
+}
+```
+
 ---
 
 ### SlashCommand Tool
@@ -575,6 +779,22 @@ interface SlashCommandTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["command"],
+  "additionalProperties": false,
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "The slash command to execute with its arguments, e.g., \"/review-pr 123\""
+    }
+  }
+}
+```
+
 **Command Expansion:**
 - Commands defined in `.claude/commands/*.md`
 - Prompt text expands in next message
@@ -593,7 +813,7 @@ interface SlashCommandTool {
 - "This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user"
 - "It also helps the user understand the progress of the task and overall progress of their requests"
 
-**When to Use This Tool :**
+**When to Use This Tool:**
 1. "**Complex multi-step tasks** - When a task requires 3 or more distinct steps or actions"
 2. "**Non-trivial and complex tasks** - Tasks that require careful planning or multiple operations"
 3. "**User explicitly requests todo list** - When the user directly asks you to use the todo list"
@@ -602,27 +822,27 @@ interface SlashCommandTool {
 6. "**When you start working on a task** - Mark it as in_progress BEFORE beginning work. **Ideally you should only have one todo as in_progress at a time**"
 7. "**After completing a task** - Mark it as completed and add any new follow-up tasks discovered during implementation"
 
-**When NOT to Use This Tool :**
+**When NOT to Use This Tool:**
 - "There is only a single, straightforward task"
 - "The task is trivial and tracking it provides no organizational benefit"
 - "The task can be completed in less than 3 trivial steps"
 - "The task is purely conversational or informational"
 - "NOTE that you should **not use this tool if there is only one trivial task to do**. In this case you are better off just doing the task directly"
 
-**Task Management :**
+**Task Management:**
 - "Update task status in real-time as you work"
 - "Mark tasks complete **IMMEDIATELY** after finishing (**don't batch completions**)"
 - "**Exactly ONE task must be in_progress at any time (not less, not more)**"
 - "Complete current tasks before starting new ones"
 - "Remove tasks that are no longer relevant from the list entirely"
 
-**Task Completion Requirements :**
+**Task Completion Requirements:**
 - "**ONLY** mark a task as completed when you have **FULLY** accomplished it"
 - "If you encounter errors, blockers, or cannot finish, keep the task as in_progress"
 - "When blocked, create a new task describing what needs to be resolved"
 - "Never mark a task as completed if: Tests are failing, Implementation is partial, You encountered unresolved errors, You couldn't find necessary files or dependencies"
 
-**Task Breakdown :**
+**Task Breakdown:**
 - "Create specific, actionable items"
 - "Break complex tasks into smaller, manageable steps"
 - "Use clear, descriptive task names"
@@ -641,7 +861,45 @@ interface TodoItem {
 }
 ```
 
-**Critical Rule :**
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["todos"],
+  "additionalProperties": false,
+  "properties": {
+    "todos": {
+      "type": "array",
+      "description": "The updated todo list",
+      "items": {
+        "type": "object",
+        "required": ["content", "status", "activeForm"],
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Imperative form: what needs to be done"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "completed"],
+            "description": "Task status"
+          },
+          "activeForm": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Present continuous form: what's being done"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**Critical Rule:**
 - "It is critical that you mark todos as completed **as soon as you are done** with a task. **Do not batch up multiple tasks before marking them as completed**"
 
 ---
@@ -655,7 +913,7 @@ interface TodoItem {
 - "**IMPORTANT: Only use this tool when the task requires planning the implementation steps of a task that requires writing code**"
 - "**For research tasks where you're gathering information, searching files, reading files or in general trying to understand the codebase - do NOT use this tool**"
 
-**Handling Ambiguity in Plans :**
+**Handling Ambiguity in Plans:**
 - "Before using this tool, ensure your plan is clear and unambiguous. If there are multiple valid approaches or unclear requirements:"
   1. "Use the AskUserQuestion tool to clarify with the user"
   2. "Ask about specific implementation choices (e.g., architectural patterns, which library to use)"
@@ -666,6 +924,22 @@ interface TodoItem {
 ```typescript
 interface ExitPlanModeTool {
   plan: string;         // Implementation plan (supports markdown) (required)
+}
+```
+
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["plan"],
+  "additionalProperties": false,
+  "properties": {
+    "plan": {
+      "type": "string",
+      "description": "The plan you came up with, that you want to run by the user for approval. Supports markdown. The plan should be pretty concise."
+    }
+  }
 }
 ```
 
@@ -708,6 +982,71 @@ interface Option {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["questions"],
+  "additionalProperties": false,
+  "properties": {
+    "questions": {
+      "type": "array",
+      "description": "Questions to ask the user (1-4 questions)",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["question", "header", "options", "multiSelect"],
+        "additionalProperties": false,
+        "properties": {
+          "question": {
+            "type": "string",
+            "description": "The complete question to ask the user. Should be clear, specific, and end with a question mark. Example: \"Which library should we use for date formatting?\" If multiSelect is true, phrase it accordingly, e.g. \"Which features do you want to enable?\""
+          },
+          "header": {
+            "type": "string",
+            "description": "Very short label displayed as a chip/tag (max 12 chars). Examples: \"Auth method\", \"Library\", \"Approach\"."
+          },
+          "multiSelect": {
+            "type": "boolean",
+            "description": "Set to true to allow the user to select multiple options instead of just one. Use when choices are not mutually exclusive."
+          },
+          "options": {
+            "type": "array",
+            "description": "The available choices for this question. Must have 2-4 options. Each option should be a distinct, mutually exclusive choice (unless multiSelect is enabled). There should be no 'Other' option, that will be provided automatically.",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "required": ["label", "description"],
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "The display text for this option that the user will see and select. Should be concise (1-5 words) and clearly describe the choice."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Explanation of what this option means or what will happen if chosen. Useful for providing context about trade-offs or implications."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "answers": {
+      "type": "object",
+      "description": "User answers collected by the permission component",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
 **Technical Constraints:**
 - 1-4 questions per call
 - 2-4 options per question
@@ -745,6 +1084,27 @@ interface WebFetchTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["url", "prompt"],
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL to fetch content from"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "The prompt to run on the fetched content"
+    }
+  }
+}
+```
+
 **Technical Behaviors:**
 - HTTP→HTTPS automatic upgrade
 - 15-minute self-cleaning cache
@@ -775,6 +1135,37 @@ interface WebSearchTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["query"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "string",
+      "minLength": 2,
+      "description": "The search query to use"
+    },
+    "allowed_domains": {
+      "type": "array",
+      "description": "Only include search results from these domains",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_domains": {
+      "type": "array",
+      "description": "Never include search results from these domains",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
 **Technical Limitations:**
 - Minimum query length: 2 characters
 - Only available in US
@@ -798,7 +1189,22 @@ interface GetDiagnosticsTool {
 }
 ```
 
-**Verified Behavior:**
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "uri": {
+      "type": "string",
+      "description": "Optional file URI to get diagnostics for. If not provided, gets diagnostics for all files."
+    }
+  }
+}
+```
+
+**Behavior:**
 - Queries VS Code language server
 - Returns errors, warnings, info messages
 - Can filter by specific file or get all diagnostics
@@ -819,6 +1225,22 @@ interface GetDiagnosticsTool {
 ```typescript
 interface ExecuteCodeTool {
   code: string;         // Python code to be executed (required)
+}
+```
+
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["code"],
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "The code to be executed on the kernel."
+    }
+  }
 }
 ```
 
@@ -843,6 +1265,21 @@ interface ListMcpResourcesTool {
 }
 ```
 
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "server": {
+      "type": "string",
+      "description": "Optional: filter by server name"
+    }
+  }
+}
+```
+
 ---
 
 ### ReadMcpResourceTool
@@ -854,6 +1291,26 @@ interface ListMcpResourcesTool {
 interface ReadMcpResourceTool {
   server: string;       // MCP server name (required)
   uri: string;          // Resource URI (required)
+}
+```
+
+**JSON Schema Details:**
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["server", "uri"],
+  "additionalProperties": false,
+  "properties": {
+    "server": {
+      "type": "string",
+      "description": "MCP server name"
+    },
+    "uri": {
+      "type": "string",
+      "description": "Resource URI"
+    }
+  }
 }
 ```
 
